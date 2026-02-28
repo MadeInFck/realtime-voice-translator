@@ -75,6 +75,22 @@ docker compose up -d
 
 Caddy handles HTTPS (Let's Encrypt) and reverse-proxies both the WebSocket server and the PWA static files.
 
+## How this project was built — incremental steps
+
+The `archive/` directory contains the successive prototypes that led to the current architecture. Each step added one layer of complexity:
+
+| Step | Files | What was added |
+|------|-------|----------------|
+| 1 | `basic-ws-server.py` / `basic-ws-client.py` | Plain WebSocket (`ws://`) — text exchange only, no encryption |
+| 2 | `secure-ws-server.py` / `secure-ws-client.py` | TLS (`wss://`) with self-signed certificate |
+| 3 | `wss-jwt-server.py` / `wss-jwt-client.py` | JWT authentication on top of wss — server verifies token before accepting connection |
+| 4 | `translate_agent.py` | Ollama-based translation agent (local LLM, language auto-detection) |
+| 5 | `orca_client.py` | First voice client — PicoVoice Cheetah (STT) + Orca (TTS), plain ws:// |
+| 6 | `orca-secure-client.py` | Full voice pipeline over wss:// + JWT |
+| — | `picollm-prompt-notworkingyet.py` | Exploration of on-device inference with picoLLM (not completed) |
+
+The current production code (`wss-jwt-server.py` + `webapp/`) replaces the Ollama translation with the DeepL API (server-side) and moves the entire client to a browser PWA using the PicoVoice WASM SDKs, removing the need to install anything locally.
+
 ## Notes
 
 - PicoVoice models (`.pv` files) are not included in the repo (gitignored). Copy them into `webapp/public/models/` before building.
