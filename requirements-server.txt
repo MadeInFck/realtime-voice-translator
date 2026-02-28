@@ -1,0 +1,5 @@
+websockets~=14.2
+PyJWT~=2.8.0
+python-dotenv~=1.0.1
+deepl~=1.18
+# picollm~=2.0

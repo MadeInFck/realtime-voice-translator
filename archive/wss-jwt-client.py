@@ -24,9 +24,9 @@ ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
 # Generate JWT token
-def generate_token(user_id):
+def generate_token(userid):
     """Generates a JWT token with a simple payload."""
-    payload = {"user_id": user_id}
+    payload = {"user_id": userid}
     return jwt.encode(payload, secret, algorithm="HS256")
 
 
@@ -107,7 +107,7 @@ async def start_client():
     Connects to the server and starts tasks for displaying received messages
     and user input via a thread.
     """
-    websocket_url = "wss://" + WS_URL  # Production: Check URL is correct, Dev mode: switch IP and PORT
+    websocket_url = "wss://" + url  # Production: Check URL is correct, Dev mode: switch IP and PORT
     async with websockets.connect(websocket_url, ssl=ssl_context) as websocket:
         print("WebSocket connection established.")
 

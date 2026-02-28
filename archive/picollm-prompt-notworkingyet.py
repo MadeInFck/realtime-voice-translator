@@ -1,7 +1,7 @@
 import picollm
 
 # Init PicoLLM AccessKey/Model Path
-access_key = 'l4dpMwLCGSZkaCBGnNqrW0bO/sE/8Qv/F9V9gHbvbHbdM7s2dPNsDg=='
+access_key = 'YOUR_PICOVOICE_ACCESS_KEY'  # set your key here or use os.getenv("PV_ACCESS_KEY")
 model_path = '/Users/mickaelfonck/Documents/Programmation/pico-cookbook/recipes/llm-voice-assistant/llama-3-8b-540.pllm'
 
 # List all devices (GPU/CPU) available

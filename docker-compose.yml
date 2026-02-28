@@ -1,0 +1,31 @@
+services:
+
+  # ── ws-server — WebSocket server avec traduction picoLLM ─────────────────────
+  livetranslator-server:
+    build: .
+    container_name: livetranslator-server
+    expose:
+      - "8765"
+    volumes:
+      - ./webapp/dist/models/gemma-2b-414.pllm:/models/gemma-2b-414.pllm:ro
+    env_file: .env
+    networks:
+      - web
+    restart: unless-stopped
+
+  # ── nginx — sert les fichiers PWA (HTTP plain, réseau interne Docker) ────────
+  livetranslator-client:
+    image: nginx:alpine
+    container_name: livetranslator-client
+    expose:
+      - "8766"
+    volumes:
+      - ./webapp/dist:/usr/share/nginx/html:ro   # résultat de `npm run build`
+      - ./nginx/pwa.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    external: true   # réseau Caddy existant sur le VPS

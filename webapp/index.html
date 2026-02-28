@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#0f0f1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Live Translator</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+  <!-- ── 1. Setup screen ─────────────────────────────────────────────────── -->
+  <main id="setup-screen" class="screen">
+    <h1>🌐 Live Translator</h1>
+
+    <h2>Votre prénom</h2>
+    <div class="input-group">
+      <input
+        id="name-input"
+        type="text"
+        placeholder="Ex : Alice"
+        maxlength="32"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <h2>Votre langue</h2>
+    <div id="lang-grid" class="select-grid"></div>
+
+    <h2>Voix synthétique</h2>
+    <div id="gender-grid" class="select-grid"></div>
+
+    <button id="start-btn" class="btn-primary" disabled>
+      Démarrer
+    </button>
+  </main>
+
+  <!-- ── 2. Loading screen ───────────────────────────────────────────────── -->
+  <section id="loading-screen" class="screen" hidden>
+    <h1>Initialisation…</h1>
+    <div class="spinner"></div>
+    <div id="loading-log" class="loading-log"></div>
+  </section>
+
+  <!-- ── 3. Main screen ─────────────────────────────────────────────────── -->
+  <section id="main-screen" class="screen" hidden>
+    <div class="main-header">
+      <h1>Live Translator</h1>
+      <div class="ws-badge" id="ws-badge">
+        <span id="ws-dot" class="dot dot--grey"></span>
+        <span id="ws-text">Connexion…</span>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span id="status-dot" class="dot dot--grey"></span>
+      <span id="status-text">Initialisation…</span>
+    </div>
+
+    <!-- Utilisateurs connectés -->
+    <div class="users-panel">
+      <span class="users-label">Dans la conversation :</span>
+      <div id="users-list" class="users-list"></div>
+    </div>
+
+    <div id="chat" class="chat"></div>
+
+    <div class="mic-container">
+      <button id="mic-btn" class="mic-btn listening" title="Activer / désactiver le micro">
+        🎙️
+      </button>
+      <p class="mic-label">Appuyer pour couper / réactiver le micro</p>
+    </div>
+  </section>
+
+  <script type="module" src="/src/app.js"></script>
+  <script>
+    // Register service worker for PWA offline support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

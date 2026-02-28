@@ -1,7 +1,10 @@
-.idea/*
-__pycache__/*
+.idea/
+.claude/
+__pycache__/
 server.log
 .env
+.env.local
+.env.*.local
 models/*
 .DS_Store
 dist/*
@@ -9,3 +12,8 @@ build/*
 main.spec
 cert/*
 .venv/*
+
+# PWA build artifacts
+webapp/node_modules/
+webapp/dist/
+webapp/public/models/

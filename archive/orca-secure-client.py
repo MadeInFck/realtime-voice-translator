@@ -110,7 +110,7 @@ def capture_audio_thread(websocket, loop, recorder, cheetah):
 
         transcript = ""
         while True:
-            print("Recorder thread est en écoute: ", recorder_control.is_set())
+            #print("Recorder thread est en écoute: ", recorder_control.is_set())
             # Wait for event to be defined
             recorder_control.wait()
             partial_transcript, is_endpoint = cheetah.process(recorder.read())
@@ -139,7 +139,7 @@ async def start_client(recorder, speaker, agent, orca, cheetah):
     ssl_context.verify_mode = ssl.CERT_NONE
 
     async with websockets.connect(websocket_url, ssl=ssl_context) as websocket:
-        print(f"WebSocket connection established at wss://{ip}:{port}.")
+        print(f"WebSocket connection established at wss://{websocket_url}.")#Dev mode {ip}:{port}
 
         token = generate_token(user_id)
         await send_authentication(websocket, token)

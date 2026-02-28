@@ -121,7 +121,7 @@ async def start_client(recorder, speaker, agent, orca, cheetah):
     websocket_url = "wss://" + url   #f"ws://{ip}:{port}"
 
     async with websockets.connect(websocket_url) as websocket:
-        print(f"WebSocket connection established at wss://url") ## For dev mode : {ip}:{port}.")
+        print(f"WebSocket connection established at {websocket_url}]") ## For dev mode : {ip}:{port}.")
 
         loop = asyncio.get_running_loop()
         recorder_control.set()

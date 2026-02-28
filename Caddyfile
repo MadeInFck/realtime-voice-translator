@@ -1,0 +1,20 @@
+# Caddy — terminaison TLS uniquement
+# Tout le reste (fichiers statiques, headers COOP/COEP) est géré par nginx.
+#
+# À intégrer dans le Caddyfile du VPS (remplace le bloc live-translator existant).
+
+live-translator.madeinfck.com {
+    # Connexions WebSocket → serveur Python
+    @ws {
+        header Connection *Upgrade*
+        header Upgrade    websocket
+    }
+    handle @ws {
+        reverse_proxy livetranslator:8765
+    }
+
+    # Requêtes HTTP normales → PWA (fichiers statiques via nginx)
+    handle {
+        reverse_proxy livetranslator-client:8766
+    }
+}
