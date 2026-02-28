@@ -1,27 +1,82 @@
-# Snippets and code example for a websocket client/server using PicoVoice services locally
+# realtime-voice-translator
 
-- ### Uses PicoVoice services in Python to maintain data locally:
-  - Orca and PvSpeaker to synthesize voice from speech. English, French, Spanish and German models (Korean and Japanese not implemented as speech recognition is not available yet) available at this time, male or female voice
-  - Cheetah to recognize speech to text in English, French, Spanish, German, Italian and Portuguese (Korean and Japanese not implemented yet)
-- ### Uses Ollama as the translator agent
-  - Your models are all selectionable from displayed list in the app
-- ### Implementation to come
-  - PicoLLM (work in progress) to infer using small open weight models
-  - Real time streaming
-- ### Prompt parameters selection:
-  - Model for ollama, from the list of models installed locally
-  - Model gender for speech (male, female)
-  - Model for Cheetah speech recognition (en, fr, pt, sp, ge, it)
-  - Device to listen from a list of devices available on your computer
-  - Device to speak from a list of devices available on your computer
-- ### Websocket connection
-  - In dev mode, initially used ws://ip:port for local ws connection. These parts have been commented for those who would like to test the snippets of this repo
-  - Prod mode, just set env variable as WS_URL once or if you have a ws server deployed somewhere
-- ### Some explanations about the files of the repo
-  - Basic server: as explicitly said in the name, that's the server
-  - Basic client: simple test of ws connection. Used as a prototype to check written messages exchange.
-  - Translate Agent: used to detect language of the message received by the client, translates it into the language selected by the user. 
-  - secure ws client/server: implements ssl for wss connection
-  - wss and jwt client/server: implements ssl + jwt auth based for more secure connection
-  - Orca client: this client uses speech to text (Cheetah) to recognize what is said by the user and once done, sends the message. On the other hand, when the client receives a message, it is spoken by Orca module in the language/gender configured by the user.
-  - Orca secure client: ssl and jwt auth for same features from Orca client
+Real-time bidirectional voice translator over secure WebSocket.
+User A speaks in their language → STT → translation → TTS → User B hears in their language, and vice versa.
+
+## Architecture
+
+```
+Browser (PWA)                        Server (VPS)                  Browser (PWA)
+Mic → Cheetah STT                                                  Orca TTS → Speaker
+    → WebSocket (wss://) ──── speech text ────► DeepL translate ──────► WebSocket
+                                                                   ◄── translated text
+```
+
+- **STT**: PicoVoice Cheetah (runs in browser via WASM)
+- **Translation**: DeepL API (server-side, key never exposed to client)
+- **TTS**: PicoVoice Orca (runs in browser via WASM)
+- **Transport**: WebSocket + JWT auth (token issued by server)
+- **Deployment**: Docker + Caddy (HTTPS reverse proxy)
+
+## Supported languages
+
+English, French, German, Spanish, Italian, Portuguese
+
+## Project structure
+
+```
+wss-jwt-server.py        # WebSocket server — JWT auth + DeepL translation
+webapp/                  # PWA client (Vite + vanilla JS)
+  src/
+    app.js               # Main orchestration
+    voice.js             # Cheetah STT + microphone capture
+    tts.js               # Orca TTS + audio playback
+    ws.js                # WebSocket client
+    auth.js              # JWT token fetch from server
+    config.js            # Server URL, PicoVoice key, language models
+  public/
+    sw.js                # Service worker (PWA cache)
+    manifest.json        # PWA manifest
+Dockerfile               # Server container
+docker-compose.yml       # Server + nginx (PWA static files)
+nginx/pwa.conf           # COOP/COEP headers (required for SharedArrayBuffer)
+archive/                 # Legacy Python clients (reference only)
+```
+
+## Setup
+
+### Server
+
+```bash
+cp .env.example .env     # not committed — fill in your keys
+# Required env vars:
+# SECRET_KEY=<32-byte hex>
+# DEEPL_API_KEY=<your DeepL API key>
+# WS_PORT=8765
+
+pip install -r requirements-server.txt
+python wss-jwt-server.py
+```
+
+### PWA client
+
+```bash
+cd webapp
+cp .env.example .env     # fill in VITE_PV_ACCESS_KEY
+npm install
+npm run build            # outputs to webapp/dist/
+```
+
+### Deploy (Docker)
+
+```bash
+docker compose up -d
+```
+
+Caddy handles HTTPS (Let's Encrypt) and reverse-proxies both the WebSocket server and the PWA static files.
+
+## Notes
+
+- PicoVoice models (`.pv` files) are not included in the repo (gitignored). Copy them into `webapp/public/models/` before building.
+- `PV_ACCESS_KEY` ends up in the compiled JS bundle — unavoidable with browser-side PicoVoice SDKs. Acceptable for private use.
+- `SECRET_KEY` never leaves the server — the client fetches a JWT from `GET /token`.
